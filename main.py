@@ -24,6 +24,7 @@ from src.visualization import (
     make_top_bar_fig,
     save_plotly_figure,
 )
+from src.reporting import generate_html_report
 
 
 def run_pipeline(
@@ -33,6 +34,7 @@ def run_pipeline(
     top_n: int = 15,
     anomaly_window: int = 30,
     anomaly_z_threshold: float = 3.0,
+    create_report: bool = False,
 ) -> None:
     """
     Run the full analytics pipeline and export CSV summaries + PNG charts.
@@ -138,6 +140,36 @@ def run_pipeline(
         )
         save_plotly_figure(fig_anom, OUTPUTS_PLOTS_DIR / f"anomalies_{suffix}.png")
 
+    if create_report:
+        report_path = OUTPUTS_DATA_DIR.parent / f"report_{suffix}.html"
+        figs = {
+            "Revenue trends (daily)": fig_daily,
+            "Revenue trends (monthly)": fig_monthly,
+            f"Top countries by revenue (Top {top_n})": fig_top_c,
+            "RFM segment distribution": fig_rfm,
+        }
+        if not anomalies_only.empty:
+            figs["Anomalies in daily revenue"] = fig_anom
+
+        tables = {
+            f"Top countries (Top {top_n})": top_c,
+            f"Top customers (Top {top_n})": top_cust,
+            f"Top products (Top {top_n})": top_prod,
+            "RFM segments (summary)": rfm_segments,
+            "Peak times per country": peaks,
+        }
+
+        generate_html_report(
+            report_path,
+            title="Online Retail Analytics Report",
+            dataset_path=input_path,
+            kpis=kpis,
+            figs=figs,
+            tables=tables,
+            notes="This report was generated from the project pipeline (main.py).",
+        )
+        print("Saved report:", report_path)
+
     print("Exports saved to `outputs/`.")
 
 
@@ -158,17 +190,25 @@ def _parse_args() -> argparse.Namespace:
         default=3.0,
         help="Z-score threshold for anomaly detection.",
     )
+    parser.add_argument(
+        "--report",
+        type=str,
+        default="true",
+        help="Generate a client-ready HTML report (true/false).",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_args()
     include_canceled = str(args.include_canceled_in_metrics).strip().lower() in {"1", "true", "yes", "y"}
+    create_report = str(args.report).strip().lower() in {"1", "true", "yes", "y"}
     run_pipeline(
         input_csv=args.input_csv,
         include_canceled_in_metrics=include_canceled,
         top_n=args.top_n,
         anomaly_window=args.anomaly_window,
         anomaly_z_threshold=args.anomaly_z_threshold,
+        create_report=create_report,
     )
 

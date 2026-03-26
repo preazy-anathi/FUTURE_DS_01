@@ -72,7 +72,7 @@ If your dataset is elsewhere, you can point to it:
 ### 3) Run the export pipeline (creates CSVs and PNG images)
 
 ```bash
-python main.py --include-canceled-in-metrics false
+python main.py --include-canceled-in-metrics false --report true
 ```
 
 Optional:
@@ -80,6 +80,20 @@ Optional:
 ```bash
 python main.py --input-csv "C:/path/to/data.csv"
 ```
+
+### 4) Generate a client-ready report (HTML + PDF)
+
+- **HTML report (recommended)**:
+
+```bash
+python report.py
+```
+
+This creates an HTML file in `outputs/` (for example: `outputs/report_canceled_excluded.html`).
+
+- **PDF**:
+  - Open the generated `.html` report in Chrome/Edge
+  - Use **Print → Save as PDF**
 
 ### 4) Launch the dashboard
 
