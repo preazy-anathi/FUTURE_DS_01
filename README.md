@@ -94,7 +94,7 @@ After running `main.py`, you will find:
 - `outputs/data/*.csv` - KPI inputs and precomputed summaries
 - `outputs/plots/*.png` - exported Plotly charts (images)
 
-## Screenshots to Include (for your GitHub README)
+## Screenshots to Include 
 
 Add screenshots for:
 
